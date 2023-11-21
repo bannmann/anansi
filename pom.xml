@@ -10,7 +10,7 @@
 
     <groupId>dev.bannmann.anansi</groupId>
     <artifactId>anansi</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
