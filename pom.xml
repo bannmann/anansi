@@ -17,16 +17,16 @@
     <description>Library for calculating exception fingerprints for efficient incident logging</description>
     <url>https://github.com/bannmann/anansi</url>
 
+    <modules>
+        <module>core</module>
+        <module>postgresql</module>
+    </modules>
+
     <scm>
         <connection>scm:git:https://github.com/bannmann/anansi.git</connection>
         <tag>HEAD</tag>
         <url>https://github.com/bannmann/anansi</url>
     </scm>
-
-    <modules>
-        <module>core</module>
-        <module>postgresql</module>
-    </modules>
 
     <properties>
         <javadoc.sources.directory>${project.build.directory}/generated-sources/javadoc-input</javadoc.sources.directory>
