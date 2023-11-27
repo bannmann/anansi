@@ -3,8 +3,6 @@ package dev.bannmann.anansi.core;
 import lombok.RequiredArgsConstructor;
 
 import com.github.mizool.core.exception.InvalidBackendReplyException;
-import dev.bannmann.anansi.core.Anansi;
-import dev.bannmann.anansi.core.Severity;
 
 @RequiredArgsConstructor
 final class ExampleForIgnoring

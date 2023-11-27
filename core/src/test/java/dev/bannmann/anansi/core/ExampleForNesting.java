@@ -2,8 +2,6 @@ package dev.bannmann.anansi.core;
 
 import lombok.extern.slf4j.XSlf4j;
 
-import dev.bannmann.anansi.core.Anansi;
-
 @XSlf4j
 final class ExampleForNesting
 {
