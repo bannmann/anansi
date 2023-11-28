@@ -3,6 +3,7 @@ package dev.bannmann.anansi.postgresql;
 import static dev.bannmann.anansi.postgresql.generated.Tables.FINGERPRINT;
 import static dev.bannmann.anansi.postgresql.generated.Tables.INCIDENT;
 import static dev.bannmann.anansi.postgresql.generated.Tables.INCIDENT_DATA;
+import static org.apiguardian.api.API.Status.STABLE;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+import org.apiguardian.api.API;
 import org.jooq.Row3;
 import org.jooq.impl.DSL;
 
@@ -22,6 +24,7 @@ import dev.bannmann.anansi.core.Incident;
 import dev.bannmann.anansi.core.IncidentStore;
 import dev.bannmann.anansi.core.StorableFingerprint;
 
+@API(status = STABLE)
 @RequiredArgsConstructor(onConstructor_ = @Inject, access = AccessLevel.PROTECTED)
 public class PostgresIncidentStore implements IncidentStore
 {

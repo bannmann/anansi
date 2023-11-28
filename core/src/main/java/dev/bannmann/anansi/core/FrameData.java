@@ -11,7 +11,24 @@ import com.github.mizool.core.validation.Nullable;
 @Builder(access = AccessLevel.PRIVATE)
 public class FrameData
 {
-    static FrameData from(StackTraceElement element)
+    public static FrameData from(StackTraceElement element)
+    {
+        String methodName = element.getClassName() + "." + element.getMethodName();
+
+        Integer lineNumber = element.getLineNumber();
+        if (lineNumber < 0)
+        {
+            lineNumber = null;
+        }
+
+        return FrameData.builder()
+            .methodName(methodName)
+            .fileName(element.getFileName())
+            .line(lineNumber)
+            .build();
+    }
+
+    public static FrameData from(StackWalker.StackFrame element)
     {
         String methodName = element.getClassName() + "." + element.getMethodName();
 

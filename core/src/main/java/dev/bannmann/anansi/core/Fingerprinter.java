@@ -1,6 +1,13 @@
 package dev.bannmann.anansi.core;
 
+import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+
+import org.apiguardian.api.API;
 
 /**
  * Enriches the set of data used for fingerprinting an exception. This is useful for things like REST requests performed
@@ -13,9 +20,25 @@ public abstract class Fingerprinter<T extends Throwable>
 
     public final Map<String, Object> extractDataFromThrowable(Throwable throwable)
     {
+        return extract(throwable, this::extractData);
+    }
+
+    private <E> E extract(Throwable throwable, Function<T, E> function)
+    {
         T cast = getThrowableClass().cast(throwable);
-        return extractData(cast);
+        return function.apply(cast);
     }
 
     protected abstract Map<String, Object> extractData(T throwable);
+
+    @API(status = EXPERIMENTAL)
+    public final List<FrameData> extractFramesFromThrowable(Throwable throwable)
+    {
+        return extract(throwable, this::extractFrames);
+    }
+
+    protected List<FrameData> extractFrames(T throwable)
+    {
+        return Collections.emptyList();
+    }
 }
