@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,13 @@ import com.google.errorprone.annotations.CheckReturnValue;
 @Slf4j
 public final class Anansi
 {
+    @Data
+    private static class ExtraFingerprintContents
+    {
+        private Map<String, Object> data = new HashMap<>();
+        private List<FrameData> frames = Collections.emptyList();
+    }
+
     private static final FingerprinterCatalog FINGERPRINTERS = new FingerprinterCatalog();
     private static final ContextDataProviderCatalog CONTEXT_DATA_PROVIDERS = new ContextDataProviderCatalog();
     private static final ThreadLocal<ThrowableContextMap> THROWABLE_CONTEXT_DATA = ThreadLocal.withInitial(
@@ -129,9 +137,20 @@ public final class Anansi
 
         String throwableClassName = cause.getClass()
             .getName();
-        FrameData location = obtainLocation(causeAndConsequences);
         List<FrameData> relevantFrames = collectRelevantFrames(causeAndConsequences);
-        Map<String, Object> extraData = collectExtraData(causeAndConsequences);
+
+        ExtraFingerprintContents extraContents = collectExtraContents(causeAndConsequences);
+        Map<String, Object> extraData = extraContents.getData();
+        List<FrameData> extraFrames = extraContents.getFrames();
+        if (shouldAppendExtraFrames(extraFrames, relevantFrames))
+        {
+            var combinedFrames = new ArrayList<FrameData>();
+            combinedFrames.addAll(relevantFrames);
+            combinedFrames.addAll(extraFrames);
+            relevantFrames = combinedFrames;
+        }
+
+        FrameData location = obtainLocation(relevantFrames);
 
         return FingerprintData.builder()
             .throwableClassName(throwableClassName)
@@ -141,46 +160,44 @@ public final class Anansi
             .build();
     }
 
-    private FrameData obtainLocation(List<Throwable> rootCauseAndFollowups)
+    private boolean shouldAppendExtraFrames(List<FrameData> extraFrames, List<FrameData> relevantFrames)
     {
-        return rootCauseAndFollowups.stream()
-            .map(this::tryGetAppLocation)
-            .filter(Objects::nonNull)
-            .findFirst()
-            .orElse(null);
-    }
+        if (extraFrames.isEmpty())
+        {
+            return false;
+        }
 
-    private FrameData tryGetAppLocation(Throwable throwable)
-    {
-        StackTraceElement[] stackTrace = throwable.getStackTrace();
-
-        return Arrays.stream(stackTrace)
+        Optional<FrameData> topmostRelevantExtraFrame = extraFrames.stream()
             .filter(this::isRelevant)
-            .map(FrameData::from)
-            .findFirst()
-            .orElse(null);
+            .reduce((first, second) -> second);
+        if (topmostRelevantExtraFrame.isEmpty())
+        {
+            return false;
+        }
+
+        return !relevantFrames.contains(topmostRelevantExtraFrame.get());
     }
 
-    private boolean isRelevant(StackTraceElement stackTraceElement)
+    private boolean isRelevant(FrameData frameData)
     {
-        return isInsideApplication(stackTraceElement) && isActualSourceCode(stackTraceElement);
+        return isInsideApplication(frameData) && isActualSourceCode(frameData);
     }
 
-    private boolean isInsideApplication(StackTraceElement stackTraceElement)
+    private boolean isInsideApplication(FrameData frameData)
     {
         return applicationPackageRoots.stream()
-            .anyMatch(rootPackage -> stackTraceElement.getClassName()
+            .anyMatch(rootPackage -> frameData.getMethodName()
                 .startsWith(rootPackage + "."));
     }
 
-    private boolean isActualSourceCode(StackTraceElement stackTraceElement)
+    private boolean isActualSourceCode(FrameData frameData)
     {
         /*
          * Examples:
          * com.example.ScopedRunner$Proxy$_$$_WeldSubclass.run(Unknown Source)
          * com.example.ScopedRunner$Proxy$_$$_WeldClientProxy.run(Unknown Source)
          */
-        return !stackTraceElement.getClassName()
+        return !frameData.getMethodName()
             .contains("$Proxy$");
     }
 
@@ -196,8 +213,8 @@ public final class Anansi
         for (Throwable throwable : consequences)
         {
             List<FrameData> currentFrames = Arrays.stream(throwable.getStackTrace())
-                .filter(this::isRelevant)
                 .map(FrameData::from)
+                .filter(this::isRelevant)
                 .collect(Collectors.toList());
 
             FrameData currentEntryFrame = null;
@@ -234,8 +251,8 @@ public final class Anansi
         // Add remaining frames, but only those that are relevant
         Arrays.stream(stackTrace)
             .skip(1)
-            .filter(this::isRelevant)
             .map(FrameData::from)
+            .filter(this::isRelevant)
             .forEachOrdered(result::add);
 
         return result.build();
@@ -246,20 +263,26 @@ public final class Anansi
         return list.get(list.size() - 1);
     }
 
-    private Map<String, Object> collectExtraData(List<Throwable> throwables)
+    private ExtraFingerprintContents collectExtraContents(List<Throwable> throwables)
     {
-        Map<String, Object> result = new HashMap<>();
+        ExtraFingerprintContents result = new ExtraFingerprintContents();
+
         for (Throwable throwable : throwables)
         {
             ObjectExtras.tryCast(throwable, Fingerprintable.class)
-                .map(Fingerprintable::getFingerprintData)
-                .ifPresent(result::putAll);
+                .ifPresent(fingerprintable -> {
+                    result.getData()
+                        .putAll(fingerprintable.getFingerprintData());
+                    result.setFrames(fingerprintable.getAdditionalFrames());
+                });
 
             for (Fingerprinter<?> fingerprinter : FINGERPRINTERS.lookup(throwable))
             {
                 try
                 {
-                    result.putAll(fingerprinter.extractDataFromThrowable(throwable));
+                    result.getData()
+                        .putAll(fingerprinter.extractDataFromThrowable(throwable));
+                    result.setFrames(fingerprinter.extractFramesFromThrowable(throwable));
                 }
                 catch (RuntimeException e)
                 {
@@ -272,6 +295,14 @@ public final class Anansi
             }
         }
         return result;
+    }
+
+    private FrameData obtainLocation(List<FrameData> frames)
+    {
+        return frames.stream()
+            .filter(this::isRelevant)
+            .findFirst()
+            .orElse(null);
     }
 
     private Map<String, Object> collectContextData(List<Throwable> throwables)
