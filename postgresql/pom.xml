@@ -12,12 +12,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.bannmann.labs</groupId>
-            <artifactId>records-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>dev.bannmann.anansi</groupId>
             <artifactId>anansi-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.bannmann.labs</groupId>
+            <artifactId>records-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>

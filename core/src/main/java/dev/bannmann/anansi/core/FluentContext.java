@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.bannmann.labs.core.function.IoRunnable;
 
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 public final class FluentContext

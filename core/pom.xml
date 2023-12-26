@@ -12,7 +12,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.bannmann.labs</groupId>
+            <groupId>dev.bannmann.labs</groupId>
             <artifactId>core</artifactId>
         </dependency>
         <dependency>

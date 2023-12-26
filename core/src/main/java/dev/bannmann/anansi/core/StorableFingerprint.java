@@ -1,6 +1,6 @@
 package dev.bannmann.anansi.core;
 
-import static com.github.bannmann.labs.core.NullSafe.tryGet;
+import static dev.bannmann.labs.core.NullSafe.tryGet;
 
 import java.util.List;
 import java.util.Map;

@@ -19,10 +19,10 @@ import org.apiguardian.api.API;
 import org.jooq.Row3;
 import org.jooq.impl.DSL;
 
-import com.github.bannmann.labs.records_api.Records;
 import dev.bannmann.anansi.core.Incident;
 import dev.bannmann.anansi.core.IncidentStore;
 import dev.bannmann.anansi.core.StorableFingerprint;
+import dev.bannmann.labs.records_api.Records;
 
 @API(status = STABLE)
 @RequiredArgsConstructor(onConstructor_ = @Inject, access = AccessLevel.PROTECTED)
@@ -35,7 +35,7 @@ public class PostgresIncidentStore implements IncidentStore
     public void store(Incident pojo, StorableFingerprint fingerprint)
     {
         records.insertInto(FINGERPRINT)
-            .withAnonymousConvertedVia(fingerprintRecordConverter::fromPojo)
+            .withCustomKeyedConvertedVia(fingerprintRecordConverter::fromPojo)
             .fromPojo(fingerprint)
             .onDuplicateKeyIgnore()
             .voidExecute();
