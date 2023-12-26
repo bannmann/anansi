@@ -18,11 +18,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.github.bannmann.labs.core.ObjectExtras;
 import com.github.mizool.core.Identifier;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.bannmann.labs.core.ObjectExtras;
 
 @RequiredArgsConstructor
 @Slf4j

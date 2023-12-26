@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.bannmann</groupId>
+        <groupId>dev.bannmann</groupId>
         <artifactId>base</artifactId>
-        <version>1.3</version>
+        <version>1.6</version>
     </parent>
 
     <groupId>dev.bannmann.anansi</groupId>
     <artifactId>anansi</artifactId>
-    <version>0.3</version>
+    <version>0.4</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -28,37 +28,17 @@
         <url>https://github.com/bannmann/anansi</url>
     </scm>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <properties>
+        <base.toolchains.jdk>17</base.toolchains.jdk>
         <javadoc.sources.directory>${project.build.directory}/generated-sources/javadoc-input</javadoc.sources.directory>
-        <jooq.version>3.16.3</jooq.version>
-        <labs.version>0.0.9</labs.version>
-        <lombok.core.version>1.18.24</lombok.core.version>
-        <lombok.plugin.version>1.18.20.0</lombok.plugin.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <mizool.version>0.51</mizool.version>
-        <slf4j.version>2.0.9</slf4j.version>
+        <jooq.version>3.18.4</jooq.version>
+        <labs.version>0.0.14</labs.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.github.bannmann.labs</groupId>
-                <artifactId>core</artifactId>
-                <version>${labs.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.bannmann.labs</groupId>
-                <artifactId>records-api</artifactId>
-                <version>${labs.version}</version>
-            </dependency>
             <dependency>
                 <groupId>dev.bannmann.anansi</groupId>
                 <artifactId>anansi-core</artifactId>
@@ -70,9 +50,19 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.inject</groupId>
-                <artifactId>javax.inject</artifactId>
-                <version>1</version>
+                <groupId>dev.bannmann.labs</groupId>
+                <artifactId>core</artifactId>
+                <version>${labs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.bannmann.labs</groupId>
+                <artifactId>records-api</artifactId>
+                <version>${labs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-api</artifactId>
+                <version>1.0.3</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -113,15 +103,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>com.amashchenko.maven.plugin</groupId>
-                    <artifactId>gitflow-maven-plugin</artifactId>
-                    <configuration>
-                        <gitFlowConfig>
-                            <productionBranch>main</productionBranch>
-                        </gitFlowConfig>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
@@ -175,14 +156,6 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.13</version>
-                    <configuration>
-                        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

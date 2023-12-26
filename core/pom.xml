@@ -5,14 +5,14 @@
     <parent>
         <groupId>dev.bannmann.anansi</groupId>
         <artifactId>anansi</artifactId>
-        <version>0.3</version>
+        <version>0.4</version>
     </parent>
 
     <artifactId>anansi-core</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.github.bannmann.labs</groupId>
+            <groupId>dev.bannmann.labs</groupId>
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
