@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import com.github.mizool.core.Identifier;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.bannmann.labs.core.function.IoRunnable;
 
@@ -15,6 +16,12 @@ import dev.bannmann.labs.core.function.IoRunnable;
 public final class FluentContext
 {
     private final Map<String, Object> values = new HashMap<>();
+
+    @CheckReturnValue
+    public FluentContext set(String key, Identifier<?> id)
+    {
+        return set(key, id.getValue());
+    }
 
     @CheckReturnValue
     public FluentContext set(String key, Object value)
