@@ -10,17 +10,11 @@
 
     <groupId>dev.bannmann.anansi</groupId>
     <artifactId>anansi</artifactId>
-    <version>0.4</version>
-    <packaging>pom</packaging>
+    <version>0.5</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Library for calculating exception fingerprints for efficient incident logging</description>
     <url>https://github.com/bannmann/anansi</url>
-
-    <modules>
-        <module>core</module>
-        <module>postgresql</module>
-    </modules>
 
     <scm>
         <connection>scm:git:https://github.com/bannmann/anansi.git</connection>
@@ -31,8 +25,6 @@
     <properties>
         <base.toolchains.jdk>17</base.toolchains.jdk>
         <javadoc.sources.directory>${project.build.directory}/generated-sources/javadoc-input</javadoc.sources.directory>
-        <jooq.version>3.18.4</jooq.version>
-        <labs.version>0.0.14</labs.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
@@ -40,49 +32,20 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>dev.bannmann.anansi</groupId>
-                <artifactId>anansi-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.bannmann.anansi</groupId>
-                <artifactId>anansi-postgresql</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>dev.bannmann.labs</groupId>
                 <artifactId>core</artifactId>
-                <version>${labs.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.bannmann.labs</groupId>
-                <artifactId>records-api</artifactId>
-                <version>${labs.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jakarta.inject</groupId>
-                <artifactId>jakarta.inject-api</artifactId>
-                <version>1.0.3</version>
-                <scope>provided</scope>
+                <version>0.0.14</version>
             </dependency>
             <dependency>
                 <groupId>org.apiguardian</groupId>
                 <artifactId>apiguardian-api</artifactId>
                 <version>1.1.2</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>3.19.0</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jooq</groupId>
-                <artifactId>jooq-parent</artifactId>
-                <version>${jooq.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.kohsuke.metainf-services</groupId>
@@ -100,6 +63,38 @@
         </dependencies>
     </dependencyManagement>
 
+    <dependencies>
+        <dependency>
+            <groupId>dev.bannmann.labs</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apiguardian</groupId>
+            <artifactId>apiguardian-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kohsuke.metainf-services</groupId>
+            <artifactId>metainf-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-ext</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -116,56 +111,8 @@
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>3.3.1</version>
                 </plugin>
-                <plugin>
-                    <groupId>org.jooq</groupId>
-                    <artifactId>jooq-codegen-maven</artifactId>
-                    <version>${jooq.version}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.jooq</groupId>
-                            <artifactId>jooq-meta-extensions</artifactId>
-                            <version>${jooq.version}</version>
-                        </dependency>
-                    </dependencies>
-                    <executions>
-                        <execution>
-                            <id>jooq-codegen</id>
-                            <goals>
-                                <goal>generate</goal>
-                            </goals>
-                            <phase>generate-sources</phase>
-                            <configuration>
-                                <generator>
-                                    <database>
-                                        <name>org.jooq.meta.extensions.ddl.DDLDatabase</name>
-                                        <properties>
-                                            <property>
-                                                <key>scripts</key>
-                                                <value>${project.basedir}/src/main/db/schema.sql</value>
-                                            </property>
-                                            <property>
-                                                <key>defaultNameCase</key>
-                                                <value>lower</value>
-                                            </property>
-                                        </properties>
-                                    </database>
-                                    <target>
-                                        <packageName>dev.bannmann.anansi.postgresql.generated</packageName>
-                                    </target>
-                                </generator>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
             </plugins>
         </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <groupId>org.jooq</groupId>
-                <artifactId>jooq-codegen-maven</artifactId>
-            </plugin>
-        </plugins>
     </build>
 
     <profiles>
@@ -178,51 +125,6 @@
                 </property>
             </activation>
             <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <artifactId>maven-resources-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <id>prepare-javadoc-jooq</id>
-                                    <goals>
-                                        <goal>copy-resources</goal>
-                                    </goals>
-                                    <phase>prepare-package</phase>
-                                    <configuration>
-                                        <outputDirectory>${javadoc.sources.directory}</outputDirectory>
-                                        <resources>
-                                            <resource>
-                                                <directory>${project.build.directory}/generated-sources/jooq</directory>
-                                            </resource>
-                                        </resources>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-maven-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <id>prepare-javadoc-main</id>
-                                    <goals>
-                                        <goal>delombok</goal>
-                                    </goals>
-                                    <phase>prepare-package</phase>
-                                    <configuration>
-                                        <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
-                                        <outputDirectory>${javadoc.sources.directory}</outputDirectory>
-                                        <addOutputDirectory>false</addOutputDirectory>
-                                        <formatPreferences>
-                                            <javaLangAsFQN>skip</javaLangAsFQN>
-                                        </formatPreferences>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
                 <plugins>
                     <plugin>
                         <groupId>com.github.ekryd.sortpom</groupId>
@@ -244,12 +146,34 @@
                         <artifactId>maven-resources-plugin</artifactId>
                     </plugin>
                     <plugin>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-javadoc-main</id>
+                                <goals>
+                                    <goal>delombok</goal>
+                                </goals>
+                                <phase>prepare-package</phase>
+                                <configuration>
+                                    <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+                                    <outputDirectory>${javadoc.sources.directory}</outputDirectory>
+                                    <addOutputDirectory>false</addOutputDirectory>
+                                    <formatPreferences>
+                                        <javaLangAsFQN>skip</javaLangAsFQN>
+                                    </formatPreferences>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>sign</id>
             <build>
