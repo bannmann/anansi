@@ -5,11 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import java.io.FilePermission;
+import java.net.HttpRetryException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.AccessControlException;
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +15,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
-import javax.sound.sampled.AudioPermission;
 
 import lombok.Getter;
 
@@ -51,21 +47,18 @@ public class TestFingerprinting
     }
 
     @MetaInfServices
-    public static class AccessControlExceptionFingerprinter extends Fingerprinter<AccessControlException>
+    public static class HttpRetryExceptionFingerprinter extends Fingerprinter<HttpRetryException>
     {
         @Override
-        public Class<AccessControlException> getThrowableClass()
+        public Class<HttpRetryException> getThrowableClass()
         {
-            return AccessControlException.class;
+            return HttpRetryException.class;
         }
 
         @Override
-        protected Map<String, Object> extractData(AccessControlException throwable)
+        protected Map<String, Object> extractData(HttpRetryException throwable)
         {
-            return Map.of("permissionType",
-                throwable.getPermission()
-                    .getClass()
-                    .getSimpleName());
+            return Map.of("responseCode", throwable.responseCode());
         }
     }
 
@@ -279,11 +272,13 @@ public class TestFingerprinting
     {
         List<Incident> incidents = new ArrayList<>();
 
-        for (Permission permission : List.of(new FilePermission("/etc/passwd", "read"),
-            new AudioPermission("play"),
-            new AudioPermission("stop")))
+        var exceptions = List.of(new HttpRetryException("Unavailable due to maintenance", 503),
+            new HttpRetryException("Outside office hours", 503),
+            new HttpRetryException("Disk full", 507));
+
+        for (HttpRetryException exception : exceptions)
         {
-            Incident incident = recordIncident(new AccessControlException("Access denied", permission));
+            Incident incident = recordIncident(exception);
             incidents.add(incident);
         }
 
