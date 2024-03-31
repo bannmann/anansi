@@ -5,24 +5,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import java.io.FilePermission;
+import java.net.HttpRetryException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.AccessControlException;
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import javax.sound.sampled.AudioPermission;
-
 import lombok.Getter;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.util.Throwables;
 import org.kohsuke.MetaInfServices;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -51,21 +49,18 @@ public class TestFingerprinting
     }
 
     @MetaInfServices
-    public static class AccessControlExceptionFingerprinter extends Fingerprinter<AccessControlException>
+    public static class HttpRetryExceptionFingerprinter extends Fingerprinter<HttpRetryException>
     {
         @Override
-        public Class<AccessControlException> getThrowableClass()
+        public Class<HttpRetryException> getThrowableClass()
         {
-            return AccessControlException.class;
+            return HttpRetryException.class;
         }
 
         @Override
-        protected Map<String, Object> extractData(AccessControlException throwable)
+        protected Map<String, Object> extractData(HttpRetryException throwable)
         {
-            return Map.of("permissionType",
-                throwable.getPermission()
-                    .getClass()
-                    .getSimpleName());
+            return Map.of("responseCode", throwable.responseCode());
         }
     }
 
@@ -137,6 +132,20 @@ public class TestFingerprinting
     }
 
     @Test
+    public void testStacklessException()
+    {
+        var throwable = new BrokenBarrierException("I'm lost!");
+        throwable.setStackTrace(new StackTraceElement[]{});
+
+        var incident = recordIncident(throwable);
+
+        assertThat(incident.getThrowableDetails()
+            .stream()
+            .map(ThrowableData::toString)).containsExactly(
+            "java.util.concurrent.BrokenBarrierException at [?]: I'm lost!");
+    }
+
+    @Test
     public void testWrappedThrowables()
     {
         try
@@ -183,6 +192,33 @@ public class TestFingerprinting
     private void originalMethod()
     {
         throw new SimulatedException();
+    }
+
+    /**
+     * Verifies that when the root cause doesn't have a stack trace, the relevant frame list is still filled. Reuses
+     * code from {@link #testWrappedThrowables()}.
+     */
+    @Test
+    public void testWrappedThrowablesWithStacklessRoot()
+    {
+        try
+        {
+            secondWrap();
+            fail("No exception thrown");
+        }
+        catch (CodeInconsistencyException e)
+        {
+            // Let's pretend the root cause exception did not include a stack trace
+            Throwables.getRootCause(e)
+                .setStackTrace(new StackTraceElement[]{});
+
+            FingerprintData data = recordIncident(e).getFingerprintData();
+
+            assertThat(data.getRelevantFrames()).map(FrameData::getMethodName)
+                .containsExactly(getClass().getName() + ".firstWrap",
+                    getClass().getName() + ".secondWrap",
+                    getClass().getName() + ".testWrappedThrowablesWithStacklessRoot");
+        }
     }
 
     @Test
@@ -279,11 +315,13 @@ public class TestFingerprinting
     {
         List<Incident> incidents = new ArrayList<>();
 
-        for (Permission permission : List.of(new FilePermission("/etc/passwd", "read"),
-            new AudioPermission("play"),
-            new AudioPermission("stop")))
+        var exceptions = List.of(new HttpRetryException("Unavailable due to maintenance", 503),
+            new HttpRetryException("Outside office hours", 503),
+            new HttpRetryException("Disk full", 507));
+
+        for (HttpRetryException exception : exceptions)
         {
-            Incident incident = recordIncident(new AccessControlException("Access denied", permission));
+            Incident incident = recordIncident(exception);
             incidents.add(incident);
         }
 

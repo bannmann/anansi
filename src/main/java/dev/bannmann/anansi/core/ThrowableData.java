@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import com.github.mizool.core.validation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Value
 @Builder(access = AccessLevel.PRIVATE)
@@ -13,7 +13,7 @@ public class ThrowableData
 {
     static ThrowableData from(Throwable throwable)
     {
-        FrameData frameData = FrameData.from(throwable.getStackTrace()[0]);
+        var frameData = getFrameDataOrNull(throwable);
         String throwableClassName = throwable.getClass()
             .getName();
         String throwableMessage = throwable.getMessage();
@@ -25,15 +25,29 @@ public class ThrowableData
             .build();
     }
 
-    @NonNull FrameData frameData;
+    private static FrameData getFrameDataOrNull(Throwable throwable)
+    {
+        var stackTrace = throwable.getStackTrace();
+        if (stackTrace.length == 0)
+        {
+            return null;
+        }
+
+        return FrameData.from(stackTrace[0]);
+    }
+
+    @Nullable FrameData frameData;
     @NonNull String throwableClassName;
 
-    @Nullable
-    String throwableMessage;
+    @Nullable String throwableMessage;
 
     @Override
     public String toString()
     {
-        return throwableClassName + " at " + frameData + ": " + throwableMessage;
+        return "%s at %s: %s".formatted(throwableClassName,
+            frameData != null
+                ? frameData
+                : "[?]",
+            throwableMessage);
     }
 }
