@@ -18,6 +18,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.github.mizool.core.Identifier;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
@@ -203,47 +205,51 @@ public final class Anansi
 
     private List<FrameData> collectRelevantFrames(List<Throwable> causeAndConsequences)
     {
-        ImmutableList<FrameData> rootCauseFrames = getFramesFromRootCause(causeAndConsequences.get(0));
+        List<FrameData> rootCauseFrames = getFramesFromRootCause(causeAndConsequences.get(0));
 
-        var result = ImmutableList.<FrameData>builder();
-        result.addAll(rootCauseFrames);
-
-        List<Throwable> consequences = causeAndConsequences.subList(1, causeAndConsequences.size());
-        FrameData previousEntryFrame = getLastElement(rootCauseFrames);
-        for (Throwable throwable : consequences)
+        if (causeAndConsequences.size() == 1)
         {
-            List<FrameData> currentFrames = Arrays.stream(throwable.getStackTrace())
-                .map(FrameData::from)
-                .filter(this::isRelevant)
-                .collect(Collectors.toList());
-
-            FrameData currentEntryFrame = null;
-            if (!currentFrames.isEmpty())
-            {
-                currentEntryFrame = getLastElement(currentFrames);
-
-                /*
-                 * If the previous exception A and the current one, B (with B.getCause() == A), don't share their entry
-                 * frame, this means that A is in another thread. As its frames are likely not sufficient for debugging,
-                 * we add those of B.
-                 */
-                if (!currentEntryFrame.equals(previousEntryFrame))
-                {
-                    result.addAll(currentFrames);
-                }
-            }
-
-            previousEntryFrame = currentEntryFrame;
+            return rootCauseFrames;
         }
 
-        return result.build();
+        List<Throwable> remainingThrowables = causeAndConsequences.subList(1, causeAndConsequences.size());
+
+        if (rootCauseFrames.isEmpty())
+        {
+            /*
+             * Not sure why this could ever be the case. However, it did happen. In that case, it's useful to start our
+             * relevant frames list with those of the *second* exception. This way, we apply the "topmost stack frame is
+             * always relevant" rule to that exception.
+             *
+             * Note that apart from the relevant frames list, the incident data will still point out the original root
+             * cause, especially its message.
+             */
+            return collectRelevantFrames(remainingThrowables);
+        }
+
+        // The regular case: combine root cause and consequence exception frames in cross-thread situations.
+        return combineFrames(rootCauseFrames, remainingThrowables);
     }
 
-    private ImmutableList<FrameData> getFramesFromRootCause(Throwable throwable)
+    private List<FrameData> getFramesFromRootCause(Throwable throwable)
     {
-        var result = ImmutableList.<FrameData>builder();
-
         StackTraceElement[] stackTrace = throwable.getStackTrace();
+
+        /*
+         * On 2024-03-31 at 01:13:41, a downstream application encountered a root cause throwable with an empty stack
+         * trace array. That caused an ArrayIndexOutOfBoundsException in this method, so Anansi only logged the
+         * following:
+         *
+         *     Exception occurred while attempting to record incident for given
+         *     com.example.TemporaryFailureException with message
+         *     "java.util.concurrent.ExecutionException: java.lang.NullPointerException"
+         */
+        if (stackTrace.length == 0)
+        {
+            return List.of();
+        }
+
+        var result = ImmutableList.<FrameData>builder();
 
         // For the root cause, we always add the topmost stack frame even if it would not be deemed relevant.
         result.add(FrameData.from(stackTrace[0]));
@@ -258,7 +264,51 @@ public final class Anansi
         return result.build();
     }
 
-    private <E> E getLastElement(List<E> list)
+    private ImmutableList<FrameData> combineFrames(List<FrameData> rootCauseFrames, List<Throwable> consequences)
+    {
+        var result = ImmutableList.<FrameData>builder();
+        result.addAll(rootCauseFrames);
+
+        @Nullable FrameData previousEntryFrame = getLastElementOrNull(rootCauseFrames);
+        for (Throwable throwable : consequences)
+        {
+            List<FrameData> currentFrames = Arrays.stream(throwable.getStackTrace())
+                .map(FrameData::from)
+                .filter(this::isRelevant)
+                .collect(Collectors.toList());
+
+            @Nullable FrameData currentEntryFrame = null;
+            if (!currentFrames.isEmpty())
+            {
+                currentEntryFrame = obtainLastElement(currentFrames);
+
+                /*
+                 * If the previous exception "A" and the current one "B" (with B.getCause() == A) don't share their
+                 * entry frame, this means that A is in another thread. As the frames of A are likely not sufficient for
+                 * debugging, we append those of B.
+                 */
+                if (!currentEntryFrame.equals(previousEntryFrame))
+                {
+                    result.addAll(currentFrames);
+                }
+            }
+
+            previousEntryFrame = currentEntryFrame;
+        }
+
+        return result.build();
+    }
+
+    private <E> @Nullable E getLastElementOrNull(List<E> list)
+    {
+        if (list.isEmpty())
+        {
+            return null;
+        }
+        return obtainLastElement(list);
+    }
+
+    private <E> E obtainLastElement(List<E> list)
     {
         return list.get(list.size() - 1);
     }
@@ -366,6 +416,6 @@ public final class Anansi
     {
         return throwables.stream()
             .map(ThrowableData::from)
-            .collect(Collectors.toList());
+            .toList();
     }
 }
