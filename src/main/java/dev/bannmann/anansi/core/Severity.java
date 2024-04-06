@@ -26,6 +26,15 @@ public enum Severity
     OBSOLETE,
 
     /**
+     * An independent background process ({@literal i.e.} unrelated to API calls by external clients) encountered a
+     * permanent but harmless error. The application will not retry on its own, but wait for user commands or other
+     * changes.
+     *
+     * @see #VISIBLE_FAILURE
+     */
+    VISIBLE_INFO,
+
+    /**
      * Application retries the operation immediately. <br>
      * <br>
      * Here, "immediately" is only meant in a loose way and includes small delays, usually less than a minute. The point
@@ -68,8 +77,11 @@ public enum Severity
     API_FAILURE,
 
     /**
-     * A background process ({@literal i.e.} not an API call by an external client) failed in a controlled way. The
-     * application will not retry on its own, but wait for user commands or other changes.
+     * An independent background process ({@literal i.e.} unrelated to API calls by external clients) encountered a
+     * permanent error that a user is told about. The application will not retry on its own, but wait for user commands
+     * or other changes.
+     *
+     * @see #VISIBLE_FAILURE
      */
     VISIBLE_FAILURE,
 
