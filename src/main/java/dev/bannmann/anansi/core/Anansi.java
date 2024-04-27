@@ -90,6 +90,12 @@ public final class Anansi
 
     private final @NonNull IncidentStore incidentStore;
 
+    /**
+     * @param throwable the throwable that caused the incident
+     * @param severity the desired severity
+     *
+     * @return an {@code Optional} containing the recorded incident, or an empty {@code Optional} if the incident could not be recorded
+     */
     public Optional<Incident> recordIncident(@NonNull Throwable throwable, @NonNull Severity severity)
     {
         try
@@ -417,5 +423,18 @@ public final class Anansi
         return throwables.stream()
             .map(ThrowableData::from)
             .toList();
+    }
+
+    /**
+     * @param throwable the throwable that caused the incident
+     * @param severity the desired severity
+     *
+     * @return the incident ID, or {@code null} if the incident could not be recorded
+     */
+    public String recordIncidentAndOnlyGetId(@NonNull Throwable throwable, @NonNull Severity severity)
+    {
+        return recordIncident(throwable, severity).map(Incident::getId)
+            .map(Identifier::getValue)
+            .orElse(null);
     }
 }
