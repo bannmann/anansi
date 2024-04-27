@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import com.github.mizool.core.Identifier;
 import com.google.errorprone.annotations.CheckReturnValue;
 import dev.bannmann.labs.core.function.IoRunnable;
+import dev.bannmann.labs.core.function.IoSupplier;
 
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 public final class FluentContext
@@ -85,6 +86,24 @@ public final class FluentContext
         try
         {
             T result = supplier.get();
+            context.succeed();
+            return result;
+        }
+        catch (Throwable e)
+        {
+            context.fail();
+            throw e;
+        }
+    }
+
+    @SuppressWarnings("java:S1181")
+    public <T> T invokeIoSupplier(IoSupplier<T> ioSupplier) throws IOException
+    {
+        CallerContext context = createCallerContext();
+
+        try
+        {
+            T result = ioSupplier.get();
             context.succeed();
             return result;
         }
