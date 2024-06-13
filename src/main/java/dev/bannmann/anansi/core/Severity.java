@@ -72,6 +72,19 @@ public enum Severity
     WARN,
 
     /**
+     * A harmless incident caused the application to send a negative response to the client that called the API.
+     * Examples include the user changing their mind during an OAuth flow leading to an "access denied" error, or
+     * when a client requests a nonexistent object but for some reason the request should be logged.<br>
+     * <br>
+     * If the problem is not obviously harmless, but is (or could be) caused by the application, {@link #API_FAILURE} is
+     * more appropriate.
+     *
+     * @see #VISIBLE_INFO
+     * @see #API_FAILURE
+     */
+    API_INFO,
+
+    /**
      * Application sends a negative response to the client that called the API.
      */
     API_FAILURE,
