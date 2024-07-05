@@ -6,6 +6,23 @@ package dev.bannmann.anansi.core;
 public enum Severity
 {
     /**
+     * Incident occurred as a consequence or during the process of adapting to another, original incident. Usually, such
+     * secondary incidents do not need to be addressed on their own.<br>
+     * <br>
+     * Note that this is different from one exception <i>causing</i> another. In both cases, there is a causal
+     * relationship between the first and the second exception: the second one would have never happened without the
+     * first. The difference between the two cases is that for "A causes B", B is a direct and inevitable consequence of
+     * A. In contrast, the {@code SECONDARY} severity implies that A happened (and is recorded as an incident), and then
+     * an attempt to mitigate the effects of A, which could have succeeded, failed due to problem B.<br>
+     * <br>
+     * If the application encounters yet another problem while addressing the {@code SECONDARY} incident and records it,
+     * that incident should use {@code SECONDARY}, as well.
+     *
+     * @see #ADAPT
+     */
+    SECONDARY,
+
+    /**
      * Incident was intentionally ignored by the application as its functionality is not affected. <br>
      * <br>
      * Example use: a third-party REST API performs an action and responds with a 204, but violates the HTTP spec by
@@ -59,7 +76,8 @@ public enum Severity
      * (e.g. requiring more requests, or being slower).<br>
      * <br>
      * Of course, the attempt with the different approach may itself fail, as well. Unless yet another approach is
-     * chosen, that failure would then be recorded with a severity different from {@code ADAPT}.<br>
+     * chosen, that failure would then be recorded with a severity different from {@code ADAPT}, e.g.
+     * {@link #SECONDARY}.<br>
      * <br>
      * Note: if the application simply retries the original operation without changing anything, one of
      * {@link #RETRY_NOW}, {@link #RETRY_SOON}, or {@link #RETRY_LATER} should be used instead.
