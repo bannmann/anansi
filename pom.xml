@@ -5,7 +5,7 @@
     <parent>
         <groupId>dev.bannmann</groupId>
         <artifactId>base</artifactId>
-        <version>1.6</version>
+        <version>1.7</version>
     </parent>
 
     <groupId>dev.bannmann.anansi</groupId>
@@ -29,6 +29,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <nullaway.version>0.11.0</nullaway.version>
+        <slf4j.version>2.0.13</slf4j.version>
     </properties>
 
     <dependencyManagement>
@@ -36,7 +37,7 @@
             <dependency>
                 <groupId>dev.bannmann.labs</groupId>
                 <artifactId>core</artifactId>
-                <version>0.0.14</version>
+                <version>0.0.21</version>
             </dependency>
             <dependency>
                 <groupId>org.apiguardian</groupId>
@@ -57,7 +58,7 @@
             <dependency>
                 <groupId>org.kohsuke.metainf-services</groupId>
                 <artifactId>metainf-services</artifactId>
-                <version>1.8</version>
+                <version>1.11</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
