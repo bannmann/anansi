@@ -8,15 +8,21 @@ import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import org.jspecify.annotations.Nullable;
+
 import com.github.mizool.core.Identifier;
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 import dev.bannmann.labs.core.function.IoRunnable;
 import dev.bannmann.labs.core.function.IoSupplier;
 
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 public final class FluentContext
 {
-    private final Map<String, Object> values = new HashMap<>();
+    @SuppressWarnings("NullAway")
+    @SuppressWarningsRationale(
+        "NullAway claims the type parameter cannot be @Nullable due to the upper bound of Map<..., V> not being @Nullable")
+    private final Map<String, @Nullable Object> values = new HashMap<>();
 
     @CheckReturnValue
     public FluentContext set(String key, Identifier<?> id)
@@ -25,14 +31,17 @@ public final class FluentContext
     }
 
     @CheckReturnValue
-    public FluentContext set(String key, Object value)
+    public FluentContext set(String key, @Nullable Object value)
     {
         values.put(key, value);
         return this;
     }
 
     @CheckReturnValue
-    public FluentContext setAll(Map<String, Object> collection)
+    @SuppressWarnings("NullAway")
+    @SuppressWarningsRationale(
+        "NullAway claims the type parameter cannot be @Nullable due to the upper bound of Map<..., V> not being @Nullable")
+    public FluentContext setAll(Map<String, @Nullable Object> collection)
     {
         values.putAll(collection);
         return this;

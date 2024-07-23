@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import com.github.mizool.core.validation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @Value
 @Builder
@@ -20,7 +20,7 @@ public class FingerprintData
      * the throwable (as opposed to library code), this is identical to the first element of
      * {@link #relevantFrames}.<br>
      * <br>
-     * This may be null when dealing with asynchronous code such as Futures.
+     * This may be {@code null} when dealing with asynchronous code such as Futures.
      */
     @Nullable
     FrameData location;

@@ -3,3 +3,5 @@
 [![](https://javadoc.io/badge2/dev.bannmann.anansi/anansi/javadoc.svg "Javadoc")](https://javadoc.io/doc/dev.bannmann.anansi/anansi)
 
 [![](https://maven-badges.herokuapp.com/maven-central/dev.bannmann.anansi/anansi/badge.svg "Javadoc")](https://maven-badges.herokuapp.com/maven-central/dev.bannmann.anansi/anansi)
+
+[![](https://img.shields.io/badge/nullness_annotations-JSpecify_1.0-darkgreen "JSpecify 1.0 nullness annotations")](https://jspecify.dev/)

@@ -12,7 +12,9 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import com.github.mizool.core.validation.Nullable;
+import org.jspecify.annotations.Nullable;
+
+import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 
 @Value
 @Builder(access = AccessLevel.PRIVATE)
@@ -21,10 +23,16 @@ public class StorableFingerprint
     public static StorableFingerprint from(Incident incident)
     {
         FingerprintData fingerprintData = incident.getFingerprintData();
+
+        @SuppressWarnings("NullAway")
+        @SuppressWarningsRationale(
+            "NullAway does not yet observe @Nullable on generic types, so it claims tryGet() doesn't accept nullable parameters")
+        String location = tryGet(fingerprintData.getLocation(), FrameData::toString);
+
         return StorableFingerprint.builder()
             .id(incident.getFingerprint())
             .name(fingerprintData.getThrowableClassName())
-            .location(tryGet(fingerprintData.getLocation(), FrameData::toString))
+            .location(location)
             .frames(toMultiLineString(fingerprintData.getRelevantFrames()))
             .extraData(toSortedMultiLineString(fingerprintData.getExtraData()))
             .build();

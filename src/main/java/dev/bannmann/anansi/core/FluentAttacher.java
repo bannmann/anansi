@@ -5,12 +5,19 @@ import java.util.function.BiConsumer;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+import org.jspecify.annotations.Nullable;
+
+import dev.bannmann.labs.annotations.SuppressWarningsRationale;
+
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class FluentAttacher
 {
-    private final BiConsumer<String, Object> putCall;
+    @SuppressWarnings("NullAway")
+    @SuppressWarningsRationale(
+        "NullAway claims the type parameter cannot be @Nullable due to the upper bound of BiConsumer<..., U> not being @Nullable")
+    private final BiConsumer<String, @Nullable Object> putCall;
 
-    public FluentAttacher set(String key, Object value)
+    public FluentAttacher set(String key, @Nullable Object value)
     {
         putCall.accept(key, value);
         return this;

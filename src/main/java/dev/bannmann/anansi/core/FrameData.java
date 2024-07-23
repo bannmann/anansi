@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import com.github.mizool.core.validation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @Value
 @Builder(access = AccessLevel.PRIVATE)
