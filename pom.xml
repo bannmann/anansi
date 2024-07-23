@@ -5,12 +5,12 @@
     <parent>
         <groupId>dev.bannmann</groupId>
         <artifactId>base</artifactId>
-        <version>1.6</version>
+        <version>1.7</version>
     </parent>
 
     <groupId>dev.bannmann.anansi</groupId>
     <artifactId>anansi</artifactId>
-    <version>0.10</version>
+    <version>0.11</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Library for calculating exception fingerprints for efficient incident logging</description>
@@ -24,9 +24,12 @@
 
     <properties>
         <base.toolchains.jdk>17</base.toolchains.jdk>
+        <error_prone.version>2.27.1</error_prone.version>
         <javadoc.sources.directory>${project.build.directory}/generated-sources/javadoc-input</javadoc.sources.directory>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <nullaway.version>0.11.0</nullaway.version>
+        <slf4j.version>2.0.13</slf4j.version>
     </properties>
 
     <dependencyManagement>
@@ -34,7 +37,7 @@
             <dependency>
                 <groupId>dev.bannmann.labs</groupId>
                 <artifactId>core</artifactId>
-                <version>0.0.14</version>
+                <version>0.0.21</version>
             </dependency>
             <dependency>
                 <groupId>org.apiguardian</groupId>
@@ -48,9 +51,14 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>org.jspecify</groupId>
+                <artifactId>jspecify</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
                 <groupId>org.kohsuke.metainf-services</groupId>
                 <artifactId>metainf-services</artifactId>
-                <version>1.8</version>
+                <version>1.11</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -79,6 +87,10 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
         </dependency>
         <dependency>
             <groupId>org.kohsuke.metainf-services</groupId>
@@ -138,6 +150,52 @@
                                     <goal>verify</goal>
                                 </goals>
                                 <phase>validate</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>errorprone-and-nullaway</id>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <phase>test</phase>
+                                <configuration>
+                                    <failOnWarning>true</failOnWarning>
+                                    <compilerArgs>
+                                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                                        <arg>-XDcompilePolicy=simple</arg>
+                                        <arg>-Xplugin:ErrorProne -Xep:MissingSummary:OFF -XepOpt:NullAway:JSpecifyMode -XepOpt:NullAway:AnnotatedPackages=dev.bannmann.anansi.core</arg>
+                                    </compilerArgs>
+                                    <annotationProcessorPaths>
+                                        <path>
+                                            <groupId>org.projectlombok</groupId>
+                                            <artifactId>lombok</artifactId>
+                                            <version>${lombok.core.version}</version>
+                                        </path>
+                                        <path>
+                                            <groupId>com.google.errorprone</groupId>
+                                            <artifactId>error_prone_core</artifactId>
+                                            <version>${error_prone.version}</version>
+                                        </path>
+                                        <path>
+                                            <groupId>com.uber.nullaway</groupId>
+                                            <artifactId>nullaway</artifactId>
+                                            <version>${nullaway.version}</version>
+                                        </path>
+                                    </annotationProcessorPaths>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

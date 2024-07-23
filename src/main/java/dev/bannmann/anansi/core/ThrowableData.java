@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @Value
 @Builder(access = AccessLevel.PRIVATE)
@@ -25,7 +25,7 @@ public class ThrowableData
             .build();
     }
 
-    private static FrameData getFrameDataOrNull(Throwable throwable)
+    private static @Nullable FrameData getFrameDataOrNull(Throwable throwable)
     {
         var stackTrace = throwable.getStackTrace();
         if (stackTrace.length == 0)

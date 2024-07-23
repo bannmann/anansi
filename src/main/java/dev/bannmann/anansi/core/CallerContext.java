@@ -12,9 +12,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 
 @ThreadSafe
 @Getter(AccessLevel.PACKAGE)
@@ -22,7 +23,10 @@ import com.google.errorprone.annotations.CheckReturnValue;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 final class CallerContext
 {
-    private final HashMap<String, Object> data = new HashMap<>();
+    @SuppressWarnings("NullAway")
+    @SuppressWarningsRationale(
+        "NullAway claims the type parameter cannot be @Nullable due to the upper bound of Map<..., V> not being @Nullable")
+    private final HashMap<String, @Nullable Object> data = new HashMap<>();
 
     private final Consumer<CallerContext> cleanupCall;
 
@@ -36,7 +40,10 @@ final class CallerContext
     }
 
     @CheckReturnValue
-    public CallerContext setAll(@NonNull Map<String, Object> map)
+    @SuppressWarnings("NullAway")
+    @SuppressWarningsRationale(
+        "NullAway claims the type parameter cannot be @Nullable due to the upper bound of Map<..., V> not being @Nullable")
+    public CallerContext setAll(@NonNull Map<String, @Nullable Object> map)
     {
         data.putAll(map);
         return this;

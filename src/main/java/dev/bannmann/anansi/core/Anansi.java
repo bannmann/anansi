@@ -1,6 +1,7 @@
 package dev.bannmann.anansi.core;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,7 +9,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,12 +18,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.github.mizool.core.Identifier;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 import dev.bannmann.labs.core.ObjectExtras;
 
 @RequiredArgsConstructor
@@ -123,7 +124,7 @@ public final class Anansi
         return Incident.builder()
             .id(Identifier.forPojo(Incident.class)
                 .random())
-            .timestamp(OffsetDateTime.now())
+            .timestamp(OffsetDateTime.now(ZoneId.systemDefault()))
             .fingerprintData(collectFingerprintData(throwables))
             .severity(severity)
             .contextData(collectContextData(throwables))
@@ -275,7 +276,7 @@ public final class Anansi
         var result = ImmutableList.<FrameData>builder();
         result.addAll(rootCauseFrames);
 
-        @Nullable FrameData previousEntryFrame = getLastElementOrNull(rootCauseFrames);
+        FrameData previousEntryFrame = getLastElementOrNull(rootCauseFrames);
         for (Throwable throwable : consequences)
         {
             List<FrameData> currentFrames = Arrays.stream(throwable.getStackTrace())
@@ -283,7 +284,7 @@ public final class Anansi
                 .filter(this::isRelevant)
                 .collect(Collectors.toList());
 
-            @Nullable FrameData currentEntryFrame = null;
+            FrameData currentEntryFrame = null;
             if (!currentFrames.isEmpty())
             {
                 currentEntryFrame = obtainLastElement(currentFrames);
@@ -293,7 +294,7 @@ public final class Anansi
                  * entry frame, this means that A is in another thread. As the frames of A are likely not sufficient for
                  * debugging, we append those of B.
                  */
-                if (!currentEntryFrame.equals(previousEntryFrame))
+                if (framesDiffer(currentEntryFrame, previousEntryFrame))
                 {
                     result.addAll(currentFrames);
                 }
@@ -317,6 +318,13 @@ public final class Anansi
     private <E> E obtainLastElement(List<E> list)
     {
         return list.get(list.size() - 1);
+    }
+
+    @SuppressWarnings("NullAway")
+    @SuppressWarningsRationale("NullAway claims Object.equals() requires a non-null argument")
+    private boolean framesDiffer(FrameData first, @Nullable FrameData second)
+    {
+        return !first.equals(second);
     }
 
     private ExtraFingerprintContents collectExtraContents(List<Throwable> throwables)
@@ -353,7 +361,7 @@ public final class Anansi
         return result;
     }
 
-    private FrameData obtainLocation(List<FrameData> frames)
+    private @Nullable FrameData obtainLocation(List<FrameData> frames)
     {
         return frames.stream()
             .filter(this::isRelevant)
@@ -379,7 +387,6 @@ public final class Anansi
     {
         CALLER_CONTEXTS.get()
             .stream()
-            .filter(Objects::nonNull)
             .map(CallerContext::getData)
             .forEachOrdered(result::putAll);
     }
@@ -431,7 +438,7 @@ public final class Anansi
      *
      * @return the incident ID, or {@code null} if the incident could not be recorded
      */
-    public String recordIncidentAndOnlyGetId(@NonNull Throwable throwable, @NonNull Severity severity)
+    public @Nullable String recordIncidentAndOnlyGetId(@NonNull Throwable throwable, @NonNull Severity severity)
     {
         return recordIncident(throwable, severity).map(Incident::getId)
             .map(Identifier::getValue)
