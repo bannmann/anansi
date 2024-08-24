@@ -112,7 +112,7 @@ public enum Severity
      * permanent error that a user is told about. The application will not retry on its own, but wait for user commands
      * or other changes.
      *
-     * @see #VISIBLE_FAILURE
+     * @see #VISIBLE_INFO
      */
     VISIBLE_FAILURE,
 
