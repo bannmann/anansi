@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.io.IOException;
 import java.net.HttpRetryException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,6 +30,7 @@ import com.github.mizool.core.exception.CodeInconsistencyException;
 import com.github.mizool.core.exception.StoreLayerException;
 import dev.bannmann.anansi.api.Fingerprintable;
 import dev.bannmann.anansi.api.FrameData;
+import dev.bannmann.anansi.api.StackFrame;
 import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 
 public class TestFingerprinting
@@ -133,6 +135,42 @@ public class TestFingerprinting
                     .containsExactly("java.net.URL.<init>", getClass().getName() + ".testLocationAndFrames");
             });
         }
+    }
+
+    @Test
+    public void testAnnotatedLocation() throws IOException
+    {
+        try
+        {
+            silentlyCreateUrl();
+        }
+        catch (MalformedURLException e)
+        {
+            FingerprintData data = recordIncident(e).getFingerprintData();
+
+            assertSoftly(softly -> {
+                // The topmost application method has incidentLocation=false, so the location is its caller.
+                softly.assertThat(data.getLocation())
+                    .isNotNull()
+                    .extracting(FrameData::getMethodName, as(STRING))
+                    .isEqualTo("testAnnotatedLocation");
+
+                // Disabling silentlyCreateUrl() as an incident location should not alter its relevant frame list
+                softly.assertThat(data.getRelevantFrames())
+                    .map(FrameData::getLocation)
+                    .containsExactly("java.net.URL.<init>",
+                        getClass().getName() + ".silentlyCreateUrl",
+                        getClass().getName() + ".testAnnotatedLocation");
+            });
+        }
+    }
+
+    @StackFrame(incidentLocation = false)
+    @SuppressWarnings("DataFlowIssue")
+    @SuppressWarningsRationale("We intentionally pass null to the URL constructor to cause an exception")
+    private void silentlyCreateUrl() throws IOException
+    {
+        new URL(null);
     }
 
     @Test
