@@ -5,7 +5,7 @@
     <parent>
         <groupId>dev.bannmann</groupId>
         <artifactId>base</artifactId>
-        <version>1.7</version>
+        <version>1.9</version>
     </parent>
 
     <groupId>dev.bannmann.anansi</groupId>
@@ -28,6 +28,7 @@
         <javadoc.sources.directory>${project.build.directory}/generated-sources/javadoc-input</javadoc.sources.directory>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <mockito-core.version>5.17.0</mockito-core.version>
         <nullaway.version>0.11.0</nullaway.version>
         <slf4j.version>2.0.13</slf4j.version>
     </properties>
@@ -35,9 +36,19 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>33.4.8-jre</version>
+            </dependency>
+            <dependency>
                 <groupId>dev.bannmann.labs</groupId>
                 <artifactId>core</artifactId>
-                <version>0.0.21</version>
+                <version>0.29</version>
+            </dependency>
+            <dependency>
+                <groupId>net.jcip</groupId>
+                <artifactId>jcip-annotations</artifactId>
+                <version>1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apiguardian</groupId>
@@ -47,7 +58,7 @@
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>3.19.0</version>
+                <version>3.27.3</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -77,8 +88,8 @@
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
+            <groupId>net.jcip</groupId>
+            <artifactId>jcip-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apiguardian</groupId>
@@ -103,6 +114,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-ext</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

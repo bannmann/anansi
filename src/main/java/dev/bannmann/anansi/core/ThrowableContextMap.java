@@ -6,14 +6,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
 import org.jspecify.annotations.Nullable;
 
 import com.github.mizool.core.exception.CodeInconsistencyException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import dev.bannmann.labs.annotations.SuppressWarningsRationale;
+import net.jcip.annotations.NotThreadSafe;
 
 /**
  * Holds identity references to exception instances and associated context data. <br>
