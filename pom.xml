@@ -10,7 +10,7 @@
 
     <groupId>dev.bannmann.anansi</groupId>
     <artifactId>anansi</artifactId>
-    <version>0.12-SNAPSHOT</version>
+    <version>0.12</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Library for calculating exception fingerprints for efficient incident logging</description>
