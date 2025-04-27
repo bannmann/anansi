@@ -198,7 +198,7 @@ public final class Anansi
     private boolean isInsideApplication(FrameData frameData)
     {
         return applicationPackageRoots.stream()
-            .anyMatch(rootPackage -> frameData.getMethodName()
+            .anyMatch(rootPackage -> frameData.getClassName()
                 .startsWith(rootPackage + "."));
     }
 
@@ -209,7 +209,7 @@ public final class Anansi
          * com.example.ScopedRunner$Proxy$_$$_WeldSubclass.run(Unknown Source)
          * com.example.ScopedRunner$Proxy$_$$_WeldClientProxy.run(Unknown Source)
          */
-        return !frameData.getMethodName()
+        return !frameData.getClassName()
             .contains("$Proxy$");
     }
 

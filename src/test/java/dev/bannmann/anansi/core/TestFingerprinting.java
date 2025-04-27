@@ -3,6 +3,7 @@ package dev.bannmann.anansi.core;
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.net.HttpRetryException;
@@ -19,7 +20,6 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.util.Throwables;
 import org.kohsuke.MetaInfServices;
 import org.testng.annotations.BeforeClass;
@@ -29,6 +29,7 @@ import com.github.mizool.core.exception.CodeInconsistencyException;
 import com.github.mizool.core.exception.StoreLayerException;
 import dev.bannmann.anansi.api.Fingerprintable;
 import dev.bannmann.anansi.api.FrameData;
+import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 
 public class TestFingerprinting
 {
@@ -91,7 +92,7 @@ public class TestFingerprinting
         assertThat(data.getThrowableClassName()).isEqualTo("java.lang.ArithmeticException");
 
         assertThat(data.getRelevantFrames()).hasSize(1)
-            .map(FrameData::getMethodName)
+            .map(FrameData::getLocation)
             .containsExactly(getClass().getName() + ".testBasics");
     }
 
@@ -102,7 +103,8 @@ public class TestFingerprinting
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings("DataFlowIssue")
+    @SuppressWarningsRationale("We intentionally pass null to the URL constructor to cause an exception")
     public void testLocationAndFrames()
     {
         try
@@ -121,13 +123,13 @@ public class TestFingerprinting
                 // The location always refers to an app class, even if the 'throw' statement is not inside the app.
                 softly.assertThat(data.getLocation())
                     .isNotNull()
-                    .extracting(FrameData::getMethodName, as(InstanceOfAssertFactories.STRING))
-                    .startsWith(getClass().getName());
+                    .extracting(FrameData::getClassName, as(STRING))
+                    .isEqualTo(getClass().getName());
 
                 // The stack trace actually contains 3 frames within URL class, but Anansi only includes the topmost.
                 softly.assertThat(data.getRelevantFrames())
                     .hasSize(2)
-                    .map(FrameData::getMethodName)
+                    .map(FrameData::getLocation)
                     .containsExactly("java.net.URL.<init>", getClass().getName() + ".testLocationAndFrames");
             });
         }
@@ -159,7 +161,7 @@ public class TestFingerprinting
         {
             FingerprintData data = recordIncident(e).getFingerprintData();
 
-            assertThat(data.getRelevantFrames()).map(FrameData::getMethodName)
+            assertThat(data.getRelevantFrames()).map(FrameData::getLocation)
                 .containsExactly(getClass().getName() + ".originalMethod",
                     getClass().getName() + ".firstWrap",
                     getClass().getName() + ".secondWrap",
@@ -216,7 +218,7 @@ public class TestFingerprinting
 
             FingerprintData data = recordIncident(e).getFingerprintData();
 
-            assertThat(data.getRelevantFrames()).map(FrameData::getMethodName)
+            assertThat(data.getRelevantFrames()).map(FrameData::getLocation)
                 .containsExactly(getClass().getName() + ".firstWrap",
                     getClass().getName() + ".secondWrap",
                     getClass().getName() + ".testWrappedThrowablesWithStacklessRoot");
@@ -238,7 +240,7 @@ public class TestFingerprinting
             Incident incident = recordIncident(e);
 
             assertThat(incident.getFingerprintData()
-                .getRelevantFrames()).map(FrameData::getMethodName)
+                .getRelevantFrames()).map(FrameData::getLocation)
                 .containsExactly(getClass().getName() + ".threadRun",
                     getClass().getName() + ".waitForCompletion",
                     getClass().getName() + ".testFramesMultithreading");
