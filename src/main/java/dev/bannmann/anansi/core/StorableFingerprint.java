@@ -14,6 +14,7 @@ import lombok.Value;
 
 import org.jspecify.annotations.Nullable;
 
+import dev.bannmann.anansi.api.FrameData;
 import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 
 @Value

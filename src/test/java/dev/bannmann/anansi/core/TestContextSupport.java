@@ -12,6 +12,8 @@ import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import dev.bannmann.anansi.api.ContextSupport;
+
 @Slf4j
 public class TestContextSupport
 {

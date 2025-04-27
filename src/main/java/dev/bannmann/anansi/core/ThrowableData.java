@@ -7,6 +7,8 @@ import lombok.Value;
 
 import org.jspecify.annotations.Nullable;
 
+import dev.bannmann.anansi.api.FrameData;
+
 @Value
 @Builder(access = AccessLevel.PRIVATE)
 public class ThrowableData

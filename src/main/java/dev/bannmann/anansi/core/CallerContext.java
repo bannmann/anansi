@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.annotation.concurrent.ThreadSafe;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -15,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.ThreadSafe;
 import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 
 @ThreadSafe

@@ -1,4 +1,4 @@
-package dev.bannmann.anansi.core;
+package dev.bannmann.anansi.api;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 

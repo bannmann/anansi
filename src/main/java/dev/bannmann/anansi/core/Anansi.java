@@ -24,6 +24,10 @@ import com.github.mizool.core.Identifier;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.bannmann.anansi.api.ContextSupport;
+import dev.bannmann.anansi.api.Fingerprintable;
+import dev.bannmann.anansi.api.FrameData;
+import dev.bannmann.anansi.api.StackFrame;
 import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 import dev.bannmann.labs.core.ObjectExtras;
 
@@ -195,7 +199,7 @@ public final class Anansi
     private boolean isInsideApplication(FrameData frameData)
     {
         return applicationPackageRoots.stream()
-            .anyMatch(rootPackage -> frameData.getMethodName()
+            .anyMatch(rootPackage -> frameData.getClassName()
                 .startsWith(rootPackage + "."));
     }
 
@@ -206,7 +210,7 @@ public final class Anansi
          * com.example.ScopedRunner$Proxy$_$$_WeldSubclass.run(Unknown Source)
          * com.example.ScopedRunner$Proxy$_$$_WeldClientProxy.run(Unknown Source)
          */
-        return !frameData.getMethodName()
+        return !frameData.getClassName()
             .contains("$Proxy$");
     }
 
@@ -365,8 +369,31 @@ public final class Anansi
     {
         return frames.stream()
             .filter(this::isRelevant)
+            .filter(this::isEligibleIncidentLocation)
             .findFirst()
             .orElse(null);
+    }
+
+    private boolean isEligibleIncidentLocation(FrameData frameData)
+    {
+        try
+        {
+            Class<?> frameClass = Class.forName(frameData.getClassName());
+            return Arrays.stream(frameClass.getDeclaredMethods())
+                .filter(method -> method.getName()
+                    .equals(frameData.getMethodName()))
+                .flatMap(method -> Arrays.stream(method.getAnnotations()))
+                .filter(StackFrame.class::isInstance)
+                .map(StackFrame.class::cast)
+                .map(StackFrame::incidentLocation)
+                .findFirst()
+                .orElse(true);
+        }
+        catch (ClassNotFoundException e)
+        {
+            log.debug("Failed to access annotations of class {}", frameData.getClassName(), e);
+            return true;
+        }
     }
 
     private Map<String, Object> collectContextData(List<Throwable> throwables)

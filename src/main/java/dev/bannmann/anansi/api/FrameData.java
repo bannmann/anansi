@@ -1,4 +1,4 @@
-package dev.bannmann.anansi.core;
+package dev.bannmann.anansi.api;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,8 +13,6 @@ public class FrameData
 {
     public static FrameData from(StackTraceElement element)
     {
-        String methodName = element.getClassName() + "." + element.getMethodName();
-
         Integer lineNumber = element.getLineNumber();
         if (lineNumber < 0)
         {
@@ -22,7 +20,8 @@ public class FrameData
         }
 
         return FrameData.builder()
-            .methodName(methodName)
+            .className(element.getClassName())
+            .methodName(element.getMethodName())
             .fileName(element.getFileName())
             .line(lineNumber)
             .build();
@@ -30,8 +29,6 @@ public class FrameData
 
     public static FrameData from(StackWalker.StackFrame element)
     {
-        String methodName = element.getClassName() + "." + element.getMethodName();
-
         Integer lineNumber = element.getLineNumber();
         if (lineNumber < 0)
         {
@@ -39,13 +36,18 @@ public class FrameData
         }
 
         return FrameData.builder()
-            .methodName(methodName)
+            .className(element.getClassName())
+            .methodName(element.getMethodName())
             .fileName(element.getFileName())
             .line(lineNumber)
             .build();
     }
 
-    @NonNull String methodName;
+    @NonNull
+    String className;
+
+    @NonNull
+    String methodName;
 
     @Nullable
     String fileName;
@@ -53,14 +55,27 @@ public class FrameData
     @Nullable
     Integer line;
 
+    /**
+     * @return class name and method name concatenated using a period
+     */
+    public String getLocation()
+    {
+        return className + "." + methodName;
+    }
+
     @Override
     public String toString()
     {
-        String location = "Unknown Source";
-        if (fileName != null && line != null)
+        return getLocation() + "(" + getSource() + ")";
+    }
+
+    private String getSource()
+    {
+        if (fileName == null || line == null)
         {
-            location = fileName + ":" + line;
+            return "Unknown Source";
         }
-        return methodName + "(" + location + ")";
+
+        return fileName + ":" + line;
     }
 }

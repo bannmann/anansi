@@ -9,6 +9,8 @@ import java.util.function.Function;
 
 import org.apiguardian.api.API;
 
+import dev.bannmann.anansi.api.FrameData;
+
 /**
  * Enriches the set of data used for fingerprinting an exception. This is useful for things like REST requests performed
  * by the application, where the same exception can occur in the same application frames, but you want to distinguish
