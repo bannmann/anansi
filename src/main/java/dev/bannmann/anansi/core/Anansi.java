@@ -24,6 +24,9 @@ import com.github.mizool.core.Identifier;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CheckReturnValue;
+import dev.bannmann.anansi.api.ContextSupport;
+import dev.bannmann.anansi.api.Fingerprintable;
+import dev.bannmann.anansi.api.FrameData;
 import dev.bannmann.labs.annotations.SuppressWarningsRationale;
 import dev.bannmann.labs.core.ObjectExtras;
 

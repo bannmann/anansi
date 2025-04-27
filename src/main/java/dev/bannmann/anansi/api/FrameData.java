@@ -1,4 +1,4 @@
-package dev.bannmann.anansi.core;
+package dev.bannmann.anansi.api;
 
 import lombok.AccessLevel;
 import lombok.Builder;

@@ -27,6 +27,8 @@ import org.testng.annotations.Test;
 
 import com.github.mizool.core.exception.CodeInconsistencyException;
 import com.github.mizool.core.exception.StoreLayerException;
+import dev.bannmann.anansi.api.Fingerprintable;
+import dev.bannmann.anansi.api.FrameData;
 
 public class TestFingerprinting
 {
