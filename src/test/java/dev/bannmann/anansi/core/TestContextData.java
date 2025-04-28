@@ -10,6 +10,7 @@ import org.kohsuke.MetaInfServices;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import dev.bannmann.anansi.api.ContextDataProvider;
 import dev.bannmann.anansi.api.ContextSupport;
 
 public class TestContextData

@@ -10,6 +10,7 @@ import com.github.mizool.core.MetaInfServices;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import dev.bannmann.anansi.api.ContextDataProvider;
 
 @Slf4j
 final class ContextDataProviderCatalog

@@ -9,6 +9,7 @@ import lombok.Value;
 
 import org.jspecify.annotations.Nullable;
 
+import dev.bannmann.anansi.api.Fingerprinter;
 import dev.bannmann.anansi.api.FrameData;
 
 @Value
