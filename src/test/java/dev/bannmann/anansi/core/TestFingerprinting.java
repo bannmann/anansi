@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 import com.github.mizool.core.exception.CodeInconsistencyException;
 import com.github.mizool.core.exception.StoreLayerException;
 import dev.bannmann.anansi.api.Fingerprintable;
+import dev.bannmann.anansi.api.Fingerprinter;
 import dev.bannmann.anansi.api.FrameData;
 import dev.bannmann.anansi.api.StackFrame;
 import dev.bannmann.labs.annotations.SuppressWarningsRationale;

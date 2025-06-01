@@ -11,7 +11,7 @@ import dev.bannmann.anansi.api.FrameData;
 
 @Value
 @Builder(access = AccessLevel.PRIVATE)
-public class ThrowableData
+class ThrowableData
 {
     static ThrowableData from(Throwable throwable)
     {
